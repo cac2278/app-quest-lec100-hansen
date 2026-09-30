@@ -84,6 +84,73 @@ body.sensory .restart-everywhere{
   .wrap{padding-bottom:125px}
 }
 
+
+/* Enhanced sensory-friendly presentation: CSS only.
+   Keeps content, controls, navigation, speech, and progress logic unchanged. */
+body.sensory{
+  background:#fff;
+  color:#222;
+}
+body.sensory .wrap{
+  max-width:720px;
+}
+body.sensory .card,
+body.sensory .mission{
+  background:#fff;
+  box-shadow:none!important;
+  border:1px solid #b8b8b8;
+  border-radius:6px;
+}
+body.sensory .notice{
+  background:#f8f8f8;
+  border-left:3px solid #666;
+}
+body.sensory .location{
+  background:#f4f4f4;
+  border-radius:4px;
+}
+body.sensory .mission{
+  padding:14px;
+  grid-template-columns:34px 1fr auto;
+  gap:8px;
+}
+body.sensory .mission .icon{
+  font-size:22px;
+}
+body.sensory .mission.done{
+  background:#fafafa;
+  border-color:#777;
+}
+body.sensory .check{
+  color:#333;
+}
+body.sensory .progress{
+  height:9px;
+  background:#e6e6e6;
+}
+body.sensory .progress>div{
+  background:#555;
+}
+body.sensory .btn{
+  border-radius:6px;
+}
+body.sensory .btn.ghost{
+  background:#f2f2f2;
+}
+body.sensory .a11ybtn,
+body.sensory .restart-everywhere{
+  border-radius:6px;
+}
+body.sensory .sub,
+body.sensory .small,
+body.sensory .mission .meta,
+body.sensory .footer-note{
+  color:#555;
+}
+body.sensory .logo{
+  font-size:28px;
+}
+
 </style>
 </head>
 <body>
