@@ -1,4 +1,5 @@
 
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -46,8 +47,8 @@ textarea{min-height:82px;resize:vertical}
 @media(max-width:520px){.teamgrid{grid-template-columns:1fr}.mission{grid-template-columns:38px 1fr auto}.wrap{padding:16px 14px 70px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 
-.a11ybar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
-.a11ybtn{border:2px solid var(--purple);border-radius:999px;padding:9px 12px;background:#fff;color:var(--purple);font-weight:800;min-height:42px}
+.a11ybar{display:flex;gap:8px;flex-wrap:wrap;margin:0 auto;padding:10px 18px;max-width:760px;background:#faf9fb}
+.a11ybtn{border:2px solid var(--purple);border-radius:999px;padding:10px 14px;background:#fff;color:var(--purple);font-weight:800;min-height:44px}
 .a11ybtn[aria-pressed="true"]{background:var(--purple);color:#fff}
 body.sensory{background:#fff}
 body.sensory .card,body.sensory .mission{box-shadow:none}
@@ -55,11 +56,39 @@ body.sensory .card,body.sensory .mission{border-radius:10px}
 body.sensory .notice{background:#f7f7f7;border-left:3px solid #777}
 body.sensory .progress>div{transition:none}
 body.sensory .logo{font-size:30px}
+body.sensory #a11yHost .a11ybar{background:#fff}
+body.sensory .a11ybtn{border-radius:8px}
 body.sensory *,body.sensory *::before,body.sensory *::after{animation:none!important;transition:none!important}
+
+
+.restart-everywhere{
+  position:fixed;
+  right:14px;
+  bottom:14px;
+  z-index:9999;
+  border:2px solid var(--purple);
+  border-radius:999px;
+  padding:10px 14px;
+  background:#fff;
+  color:var(--purple);
+  font-weight:800;
+  min-height:44px;
+  box-shadow:0 3px 12px rgba(40,20,55,.12);
+}
+body.sensory .restart-everywhere{
+  border-radius:8px;
+  box-shadow:none;
+}
+@media(max-width:520px){
+  .restart-everywhere{right:10px;bottom:10px;padding:9px 12px}
+  .wrap{padding-bottom:125px}
+}
 
 </style>
 </head>
 <body>
+<div id="a11yHost"></div>
+<div id="restartHost"><button class="restart-everywhere" type="button" onclick="restart()">↻ Restart Quest</button></div>
 <main class="wrap" id="app"></main>
 <script>
 const KEY="lenoxChillV2";
@@ -69,28 +98,32 @@ let state=JSON.parse(localStorage.getItem(KEY)||"null")||fresh();
 const missions=[
 {id:"borrow",icon:"🎒",title:"What Can I Borrow?",place:"🚶 Explore the library",intro:"Lenox has more than books.",body:`<p>Look around, check a sign, or ask at the front desk.</p><p><strong>Write one surprising thing students can borrow from Lenox besides a book on your Quest Card, then tap <strong>I WROTE IT DOWN</strong>.</strong></p>`},
 {id:"help",icon:"💬",title:"Help at 2 A.M.?",place:"🖥️ Use a library computer",intro:"Research help is available even when Lenox is closed.",body:`<div class="location">🖥️ Move to a library computer. Keep this app open on your phone.</div><p class="step">1. Open the <strong>UW–Whitewater Library website</strong>.</p><p class="step">2. Find the green <strong>Ask a Librarian</strong> option.</p><p><strong>On your Quest Card, record what information the chat form asks you to enter. Then enter it here.</strong></p>`},
-{id:"guide",icon:"🗺️",title:"Find a Research Guide",place:"🖥️ Use a library computer",intro:"Research Guides collect useful resources for subjects and classes.",body:`<div class="location">🖥️ Use a library computer.</div><p>From the Library website, find <strong>Research, Citation, & Class Guides</strong>. Pick a subject that interests your team.</p><p><strong>Quest Card: What subject or guide did you choose?</strong></p><p><strong>Quest Card: Name one useful resource you found there.</strong></p>`},
-{id:"article",icon:"🔎",title:"Find an Article",place:"🖥️ Research\@UWW",intro:"Try a real library search.",body:`<div class="location">🖥️ Use a library computer.</div><p class="step">1. Open <strong>Research\@UWW</strong>.</p><p class="step">2. Search <strong>octopus AND communication</strong>.</p><p class="step">3. Set <strong>Resource Type → Articles</strong>.</p><p class="step">4. Find an article that looks useful.</p><p><strong>Quest Card: Article title</strong></p>`},
-{id:"book",icon:"📚",title:"Find a Book",place:"🖥️ Research\@UWW",intro:"The same search tool can help you find books.",body:`<div class="location">🖥️ Stay at a library computer.</div><p>In Research\@UWW, change <strong>Resource Type → Books</strong>. Find a book about octopuses.</p><p><strong>Quest Card: Book title</strong></p><p><strong>Quest Card: Call number</strong></p><p class="small">A call number tells you where a physical book belongs in the library.</p>`},
-{id:"database",icon:"🎓",title:"Meet a Database",place:"🖥️ Databases A–Z",intro:"Different databases are useful for different kinds of research.",body:`<div class="location">🖥️ Use a library computer.</div><p>From the Library website, open <strong>Databases A–Z</strong>. Choose one database you've never used before and take a look around.</p><p><strong>Quest Card: Database name</strong></p><p><strong>Quest Card: What could you use it to find?</strong></p><div class="card notice"><strong>📝 Quest Card</strong><p>On your Quest Card, record the database name and what you could use it to find.</p></div>`},
-{id:"trail",icon:"🔗",title:"Follow the Research Trail",place:"🖥️ Google Scholar",intro:"One useful source can lead you to another.",body:`<div class="location">🖥️ Use a library computer.</div><p class="step">1. Open <strong>Google Scholar</strong>.</p><p class="step">2. Search <strong>octopus AND cognition</strong>.</p><p class="step">3. Find a useful-looking result.</p><p class="step">4. Choose <strong>Related articles</strong>.</p><p><strong>Write the title of one related article on your Quest Card, then tap <strong>I WROTE IT DOWN</strong>.</strong></p>`},
+{id:"guide",icon:"🗺️",title:"Find a Research Guide.",place:"🖥️ Use a library computer",intro:"Research Guides collect useful resources for subjects and classes.",body:`<div class="location">🖥️ Use a library computer.</div><p>From the Library website, find <strong>Research, Citation, & Class Guides</strong>. Pick a subject that interests your team.</p><p><strong>Quest Card: What subject or guide did you choose?</strong></p><p><strong>Quest Card: Name one useful resource you found there.</strong></p>`},
+{id:"article",icon:"🔎",title:"Find an Article.",place:"🖥️ Research\@UWW",intro:"Try a real library search.",body:`<div class="location">🖥️ Use a library computer.</div><p class="step">1. Open <strong>Research\@UWW</strong>.</p><p class="step">2. Search <strong>octopus AND communication</strong>.</p><p class="step">3. Set <strong>Resource Type → Articles</strong>.</p><p class="step">4. Find an article that looks useful.</p><p><strong>Quest Card: Article title</strong></p>`},
+{id:"book",icon:"📚",title:"Find a Book.",place:"🖥️ Research\@UWW",intro:"The same search tool can help you find books.",body:`<div class="location">🖥️ Stay at a library computer.</div><p>In Research\@UWW, change <strong>Resource Type → Books</strong>. Find a book about octopuses.</p><p><strong>Quest Card: Book title</strong></p><p><strong>Quest Card: Call number</strong></p><p class="small">A call number tells you where a physical book belongs in the library.</p>`},
+{id:"database",icon:"🎓",title:"Meet a Database.",place:"🖥️ Databases A–Z",intro:"Different databases are useful for different kinds of research.",body:`<div class="location">🖥️ Use a library computer.</div><p>From the Library website, open <strong>Databases A–Z</strong>. Choose one database you've never used before and take a look around.</p><p><strong>Quest Card: Database name</strong></p><p><strong>Quest Card: What could you use it to find?</strong></p><div class="card notice"><strong>📝 Quest Card</strong><p>On your Quest Card, record the database name and what you could use it to find.</p></div>`},
+{id:"trail",icon:"🔗",title:"Follow the Research Trail.",place:"🖥️ Google Scholar",intro:"One useful source can lead you to another.",body:`<div class="location">🖥️ Use a library computer.</div><p class="step">1. Open <strong>Google Scholar</strong>.</p><p class="step">2. Search <strong>octopus AND cognition</strong>.</p><p class="step">3. Find a useful-looking result.</p><p class="step">4. Choose <strong>Related articles</strong>.</p><p><strong>Write the title of one related article on your Quest Card, then tap <strong>I WROTE IT DOWN</strong>.</strong></p>`},
 {id:"camille",icon:"👤",title:"How Do I Get Help?",place:"💬 Ask or explore",intro:"Getting help is part of doing research.",body:`<p>Find out how you could get individual research help from <strong>Camille Charette, Rock Campus & Archives Librarian</strong>.</p><p><strong>On your Quest Card, record one way you could contact or schedule research help. Then enter it here.</strong></p><div class="card notice"><strong>Stuck on any mission?</strong><p>You are allowed to ask Camille or a library student assistant. That's a research skill—not a shortcut.</p></div>`}
 ];
 function save(){localStorage.setItem(KEY,JSON.stringify(state))}
 function esc(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
 function accessibilityBar(){
+ const sensory=document.body.classList.contains("sensory");
+ const readLabel=paused ? "▶ Resume" : (reading ? "⏸ Pause" : "🔊 Read aloud");
  return `<div class="a11ybar" aria-label="Accessibility options">
- <button class="a11ybtn" id="readBtn" type="button" aria-pressed="false" onclick="toggleReadAloud()">🔊 Read aloud</button>
- <button class="a11ybtn" id="sensoryBtn" type="button" aria-pressed="${document.body.classList.contains('sensory')}" onclick="toggleSensory()">${document.body.classList.contains('sensory')?'🌿 Sensory-friendly: ON':'🌿 Sensory-friendly'}</button>
+ <button class="a11ybtn" id="readBtn" type="button" aria-pressed="${reading||paused?"true":"false"}" onclick="toggleReadAloud()">${readLabel}</button>
+ <button class="a11ybtn" id="sensoryBtn" type="button" aria-pressed="${sensory}" onclick="toggleSensory()">${sensory?"🌿 Sensory-friendly: ON":"🌿 Sensory-friendly"}</button>
  </div>`;
 }
 function render(){
  const app=document.getElementById("app");
+ const host=document.getElementById("a11yHost");
+ if(host) host.innerHTML=accessibilityBar();
  if(state.screen==="welcome"){
-  app.innerHTML=`<header><div class="logo">🐙</div><div><strong>LENOX LIBRARY</strong><div class="small">UW–Whitewater at Rock County</div></div></header>
+  app.innerHTML=`<header class="speech-skip"><div class="logo">🐙</div><div><strong>LENOX LIBRARY</strong><div class="small">UW–Whitewater at Rock County</div></div></header>
   <div class="card"><h1>Explore Lenox.</h1><p class="sub">A low-key library scavenger hunt.</p>
   <p>Work with your team. Complete the discoveries in <strong>any order</strong>. There is no race and no perfect score.</p><p><strong>Keep your Quest Card with you.</strong> Each mission has a matching space on your <strong>Quest Card</strong>. When you find an answer, <strong>write it on your Quest Card</strong>, then tap <strong>I WROTE IT DOWN</strong>.</p>
-  <div class="card notice"><strong>How it works</strong>
+  <div class="card notice"><strong>How it works.</strong>
 <p>📱 Keep this app open on your phone.<br>
 📝 <strong>Bring your Quest Card with you.</strong> Each mission has a matching space on the card.<br>
 🔎 Complete a discovery and find the requested information.<br>
@@ -101,26 +134,26 @@ function render(){
 💬 You can ask Camille or a library student assistant for help anytime.</p>
 <p><strong>At the end:</strong> bring your completed Quest Card back and show Camille your finished app screen.</p>
 </div>
-  <button class="btn" onclick="state.screen='team';save();render()">START</button></div>`;
+  <button class="btn" onclick="stopReading();state.screen='team';save();render()">START</button></div>`;
  } else if(state.screen==="team"){
-  app.innerHTML=`<button class="back" onclick="state.screen='welcome';save();render()">← Back</button><h2>Choose your team</h2><p class="sub">This is just so we know which octopus is yours at the end.</p>
-  <div class="teamgrid">${["🟣 Purple","🟢 Green","🔴 Red","🟡 Yellow"].map(t=>`<button class="btn team" onclick="state.team='${t}';state.screen='dashboard';save();render()">${t}</button>`).join("")}</div>`;
+  app.innerHTML=`<button class="back" onclick="stopReading();state.screen='welcome';save();render()">← Back</button><h2>Choose your team.</h2><p class="sub">This is just so we know which octopus is yours at the end.</p>
+  <div class="teamgrid">${["🟣 Purple","🟢 Green","🔴 Red","🟡 Yellow"].map(t=>`<button class="btn team" onclick="state.team='${t}';stopReading();state.screen='dashboard';save();render()">${t}</button>`).join("")}</div>`;
  } else if(state.screen==="dashboard"){
   const n=Object.keys(state.done).filter(k=>state.done[k]).length;
-  app.innerHTML=`<header><div class="logo">🐙</div><div><strong>${esc(state.team)} Team</strong><div class="small">Lenox Library Discovery</div></div></header>
-  <h2>Your discoveries</h2><p>Choose what to do next. <strong>Any order is fine.</strong></p><div class="card notice"><strong>📝 Don't forget your Quest Card</strong><p>For every discovery: <strong>find it → write it on your Quest Card → tap I WROTE IT DOWN.</strong> Bring the completed card back to Camille when you finish.</p></div>
-  <div class="progress" aria-label="${n} of ${missions.length} complete"><div style="width:${n/missions.length*100}%"></div></div><div class="small"><strong>${n} of ${missions.length}</strong> complete</div>
+  app.innerHTML=`<header class="speech-skip"><div class="logo">🐙</div><div><strong>${esc(state.team)} Team</strong><div class="small">Lenox Library Discovery</div></div></header>
+  <h2>Your discoveries.</h2><p>Choose what to do next. <strong>Any order is fine.</strong></p><div class="card notice"><strong>📝 Don't forget your Quest Card.</strong><p>For every discovery: <strong>find it. → write it on your Quest Card. → tap I WROTE IT DOWN.</strong> Bring the completed card back to Camille when you finish.</p></div>
+  <div class="progress" aria-label="${n} of ${missions.length} complete"><div style="width:${n/missions.length*100}%"></div></div><div class="small"><strong>${n} of ${missions.length}</strong> complete.</div>
   <div class="missions">${missions.map(m=>`<button class="mission ${state.done[m.id]?"done":""}" onclick="openMission('${m.id}')"><span class="icon">${m.icon}</span><span><strong>${m.title}</strong><div class="meta">${m.place}</div></span><span class="check">${state.done[m.id]?"✓":"›"}</span></button>`).join("")}</div>
-  ${n===missions.length?`<div class="card complete"><div style="font-size:52px">🐙</div><h2>You know your way around Lenox.</h2><p>You found services, research tools, books, articles, databases, and people who can help.</p><p><strong>You don't need to remember everything. You need to know where to come back when you need it.</strong></p><div class="card notice"><h3>Before you finish.</h3><p>Answer the <strong>Quick Reflection</strong> at the bottom of your Quest Card. Circle one number from <strong>1 (Strongly disagree)</strong> to <strong>5 (Strongly agree)</strong>.</p></div><button class="btn" onclick="state.screen='finish';save();render()">SHOW CAMILLE</button></div>`:""}
+  ${n===missions.length?`<div class="card complete"><div style="font-size:52px">🐙</div><h2>You know your way around Lenox.</h2><p>You found services, research tools, books, articles, databases, and people who can help.</p><p><strong>You don't need to remember everything. You need to know where to come back when you need it.</strong></p><div class="card notice"><h3>Before you finish.</h3><p>Answer the <strong>Quick Reflection</strong> at the bottom of your Quest Card. Circle one number from <strong>1 (Strongly disagree)</strong> to <strong>5 (Strongly agree)</strong>.</p></div><button class="btn" onclick="stopReading();state.screen='finish';save();render()">SHOW CAMILLE</button></div>`:""}
   <div class="footer-note">No timer. No penalties. Ask for help whenever you need it.</div>`;
  } else if(state.screen.startsWith("m:")){
   const id=state.screen.slice(2),m=missions.find(x=>x.id===id),a=state.answers[id]||{};
-  app.innerHTML=`<button class="back" onclick="collect('${id}',false);state.screen='dashboard';save();render()">← All discoveries</button>
+  app.innerHTML=`<button class="back" onclick="collect('${id}',false);stopReading();state.screen='dashboard';save();render()">← All discoveries</button>
   <div class="card"><div style="font-size:42px">${m.icon}</div><h2>${m.title}</h2><p class="sub">${m.intro}</p>${m.body}
-  <div class="actions"><button class="btn" onclick="completeMission('${id}')">${state.done[id]?"COMPLETED ✓":"I WROTE IT DOWN"}</button><button class="btn ghost" onclick="collect('${id}',false);state.screen='dashboard';save();render()">Do this later</button></div></div>`;
+  <div class="actions"><button class="btn" onclick="completeMission('${id}')">${state.done[id]?"COMPLETED ✓":"I WROTE IT DOWN"}</button><button class="btn ghost" onclick="collect('${id}',false);stopReading();state.screen='dashboard';save();render()">Do this later</button></div></div>`;
  } else if(state.screen==="finish"){
   const locations={"🟣 Purple":"Under the globe in the first-floor reference collection.","🟢 Green":"Right of the big screen featuring Banned Books Roulette, behind the snake plant.","🔴 Red":"Behind the Freshman Year display on the first floor.","🟡 Yellow":"Near the color printer, left of the paper stacks."};
-  app.innerHTML=`<div class="card complete"><div style="font-size:58px">🐙</div><h1>All done.</h1><div class="card notice"><h3>Before you finish.</h3><p>Make sure you answered the <strong>Quick Reflection</strong> at the bottom of your Quest Card by circling a number from <strong>1 (Strongly disagree)</strong> to <strong>5 (Strongly agree)</strong>.</p></div><p class="sub">Then show this screen and your completed Quest Card to Camille.</p><p>After Camille checks your work, she can reveal your team's optional octopus location.</p><button class="btn" onclick="document.getElementById('reveal').classList.remove('hidden')">CAMILLE: REVEAL OCTOPUS</button><div id="reveal" class="card notice hidden"><h3>${esc(state.team)} Team</h3><p><strong>${esc(locations[state.team]||"Ask Camille for your team's location.")}</strong></p><p>Bring your octopus back to base.</p></div><div class="actions"><button class="btn secondary" onclick="state.screen='dashboard';save();render()">Back to discoveries</button><button class="btn ghost" onclick="restart()">Restart</button></div></div>`;
+  app.innerHTML=`<div class="card complete"><div style="font-size:58px">🐙</div><h1>All done.</h1><div class="card notice"><h3>Before you finish.</h3><p>Make sure you answered the <strong>Quick Reflection</strong> at the bottom of your Quest Card by circling a number from <strong>1 (Strongly disagree)</strong> to <strong>5 (Strongly agree)</strong>.</p></div><p class="sub">Then show this screen and your completed Quest Card to Camille.</p><p>After Camille checks your work, she can reveal your team's optional octopus location.</p><button class="btn" onclick="document.getElementById('reveal').classList.remove('hidden')">CAMILLE: REVEAL OCTOPUS</button><div id="reveal" class="card notice hidden"><h3>${esc(state.team)} Team</h3><p><strong>${esc(locations[state.team]||"Ask Camille for your team's location.")}</strong></p><p>Bring your octopus back to base.</p></div><div class="actions"><button class="btn secondary" onclick="stopReading();state.screen='dashboard';save();render()">Back to discoveries</button><button class="btn ghost" onclick="restart()">Restart</button></div></div>`;
  }
 }
 function openMission(id){stopReading();state.screen="m:"+id;save();render()}
@@ -128,48 +161,131 @@ function collect(id,mark){if(mark)state.done[id]=true;save();}
 function completeMission(id){stopReading();state.done[id]=true;save();state.screen="dashboard";save();render();}
 
 let reading=false;
+let paused=false;
+let currentUtterance=null;
+
 function getReadableText(){
  const app=document.getElementById("app");
  if(!app) return "";
  const clone=app.cloneNode(true);
- clone.querySelectorAll(".a11ybar,button,.footer-note,.hidden").forEach(el=>el.remove());
- return clone.innerText.replace(/\s+/g," ").trim();
+ clone.querySelectorAll(".a11ybar,button,.footer-note,.hidden,.speech-skip").forEach(el=>el.remove());
+ return clone.innerText
+   .replace(/[\p{Extended_Pictographic}\uFE0F]/gu," ")
+   // Preserve periods as sentence boundaries so the voice pauses naturally.
+   // Add a space after a period when needed, rather than deleting the period.
+   .replace(/\.\s*/g,". ")
+   .replace(/\s+/g," ")
+   .trim();
 }
+
+function chooseVoice(){
+ if(!("speechSynthesis" in window)) return null;
+ const voices=window.speechSynthesis.getVoices()||[];
+ if(!voices.length) return null;
+ const usEnglish=voices.filter(v=>/^en[-_]US$/i.test(v.lang||""));
+ const femaleUS=[
+   /Microsoft.*Aria/i,/Microsoft.*Jenny/i,/Microsoft.*Zira/i,
+   /Samantha/i,/Ava/i,/Allison/i,/Susan/i,
+   /Google.*US.*English/i,/Google.*English.*US/i
+ ];
+ for(const rx of femaleUS){
+   const hit=usEnglish.find(v=>rx.test(v.name||""));
+   if(hit) return hit;
+ }
+ const qualityUS=usEnglish.find(v=>/female|natural|enhanced|premium/i.test(v.name||""));
+ if(qualityUS) return qualityUS;
+ return usEnglish.find(v=>v.default)||usEnglish[0]||null;
+}
+
+
+if("speechSynthesis" in window){
+ window.speechSynthesis.onvoiceschanged=()=>{};
+}
+
 function updateReadButton(){
  const b=document.getElementById("readBtn");
  if(!b) return;
- b.textContent=reading ? "⏹ Stop reading" : "🔊 Read aloud";
- b.setAttribute("aria-pressed",reading ? "true" : "false");
+ b.textContent=paused ? "▶ Resume" : (reading ? "⏸ Pause" : "🔊 Read aloud");
+ b.setAttribute("aria-pressed",(reading||paused) ? "true" : "false");
 }
+
 function stopReading(){
  if("speechSynthesis" in window) window.speechSynthesis.cancel();
  reading=false;
+ paused=false;
+ currentUtterance=null;
  updateReadButton();
 }
+
 function toggleReadAloud(){
- if(!("speechSynthesis" in window)){alert("Read aloud is not supported in this browser.");return;}
- if(reading){stopReading();return;}
+ if(!("speechSynthesis" in window)){
+   alert("Read aloud is not supported in this browser.");
+   return;
+ }
+ if(paused){
+   window.speechSynthesis.resume();
+   paused=false;
+   reading=true;
+   updateReadButton();
+   return;
+ }
+ if(reading){
+   window.speechSynthesis.pause();
+   paused=true;
+   reading=false;
+   updateReadButton();
+   return;
+ }
  const text=getReadableText();
  if(!text) return;
  window.speechSynthesis.cancel();
  const u=new SpeechSynthesisUtterance(text);
- u.rate=0.95;
- u.onend=()=>{reading=false;updateReadButton();};
- u.onerror=()=>{reading=false;updateReadButton();};
- reading=true;updateReadButton();window.speechSynthesis.speak(u);
+ const voice=chooseVoice();
+ if(voice) u.voice=voice;
+ u.lang=(voice&&voice.lang)||"en-US";
+ u.rate=0.92;
+ u.pitch=1;
+ u.volume=1;
+ u.onend=()=>{
+   if(currentUtterance===u){
+     reading=false;
+     paused=false;
+     currentUtterance=null;
+     updateReadButton();
+   }
+ };
+ u.onerror=()=>{
+   if(currentUtterance===u){
+     reading=false;
+     paused=false;
+     currentUtterance=null;
+     updateReadButton();
+   }
+ };
+ currentUtterance=u;
+ reading=true;
+ paused=false;
+ updateReadButton();
+ window.speechSynthesis.speak(u);
 }
+
 function toggleSensory(){
- stopReading();
  const on=!document.body.classList.contains("sensory");
  document.body.classList.toggle("sensory",on);
  localStorage.setItem("lenoxSensoryFriendly",on?"true":"false");
- render();
+ const b=document.getElementById("sensoryBtn");
+ if(b){
+   b.setAttribute("aria-pressed",on?"true":"false");
+   b.textContent=on ? "🌿 Sensory-friendly: ON" : "🌿 Sensory-friendly";
+ }
+ // Intentionally do not stop speech and do not rerender the Quest.
 }
+
 function applySavedSensory(){
  document.body.classList.toggle("sensory",localStorage.getItem("lenoxSensoryFriendly")==="true");
 }
 
-function restart(){if(confirm("Restart this scavenger hunt and clear progress on this device?")){state=fresh();save();render()}}
+function restart(){if(confirm("Restart this scavenger hunt and clear progress on this device?")){stopReading();state=fresh();save();render()}}
 applySavedSensory();
 render();
 </script>
